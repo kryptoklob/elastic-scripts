@@ -2,6 +2,8 @@ import Web3 from 'web3'
 import { Contract, ethers, providers } from "ethers"
 import { daoABI } from "./abis/dao"
 import { stakingABI } from "./abis/stakingRewards"
+import { eEURAddress } from './config'
+import { eEURABI } from './abis/eEUR'
 
 export class DaoStuff {
     private daoContract: Contract
@@ -54,9 +56,11 @@ export class DaoStuff {
 
 export class StakingStuff {
     private stakingContract: Contract
+    private eEURContract: Contract
 
     constructor(stakingAddress: string, provider: ethers.providers.Provider) {
         this.stakingContract = new ethers.Contract(stakingAddress, stakingABI, provider)
+        this.eEURContract = new ethers.Contract(eEURAddress, eEURABI, provider)
     }
 
     public async getGlobalStakingInfo() {
@@ -87,6 +91,43 @@ export class StakingStuff {
         for (let x=0; x<15 && x<sortedArray.length-1; x++) {
             console.log(`Address: ${sortedArray[x][0]}, Amount: ${sortedArray[x][1]} Percent: ${((sortedArray[x][1]/totalStaked)*100).toFixed(2)}%`)
         }
+
+        let unclaimedByAmounts = new Map<string, number>()
+        
+        for (let staker of allStakers) {
+            let unclaimedAmount = await this.getUnclaimedRewards(staker)
+            if (unclaimedAmount !== 0) {
+                unclaimedByAmounts.set(staker, unclaimedAmount)
+            }
+        }
+
+        let anotherSortedMap = new Map([...unclaimedByAmounts.entries()].sort((a, b) => b[1] - a[1] ));
+        let anotherSortedArray = Array.from(anotherSortedMap)
+
+        console.log(`\nUnclaimed Rewards:\n`)
+
+        for (let x=0; x<15 && x<anotherSortedArray.length-1; x++) {
+            console.log(`Address: ${anotherSortedArray[x][0]}, Amount: ${anotherSortedArray[x][1]}`)
+        }
+
+        let eEURAmounts = new Map<string, number>()
+
+        for (let staker of allStakers) {
+            let eEURAmountRaw = await this.eEURContract.balanceOf(staker)
+            let eEURAmount = Number(Web3.utils.fromWei(eEURAmountRaw.toString()))
+            if (eEURAmount !== 0) {
+                eEURAmounts.set(staker, eEURAmount)
+            }
+        }
+
+        let finalSortedMap = new Map([...eEURAmounts.entries()].sort((a, b) => b[1] - a[1] ));
+        let finalSortedArray = Array.from(finalSortedMap)
+
+        console.log(`\nHighest Wallet Amounts:\n`)
+
+        for (let x=0; x<15 && x<finalSortedArray.length-1; x++) {
+            console.log(`Address: ${finalSortedArray[x][0]}, Amount: ${finalSortedArray[x][1]}`)
+        }
     }
 
     private async getAllStakers() {
@@ -97,6 +138,10 @@ export class StakingStuff {
        let uniqueStakingAddresses = [...new Set(stakingAddresses)]
 
        return uniqueStakingAddresses
+    }
+
+    private async getUnclaimedRewards(user: string): Promise<number> {
+        throw new Error('Method not yet implemented.')
     }
 
 }
