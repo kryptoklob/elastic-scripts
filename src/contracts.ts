@@ -83,7 +83,7 @@ export class StakingStuff {
         let sortedArray = Array.from(sortedMap)
 
         console.log(`\n\n${allStakers.length} unique addresses have staked to the pool.`)
-        console.log(`${activeStakers.size} currently bonded staked addresses to the pool..`)
+        console.log(`${activeStakers.size} currently staked addresses to the pool..`)
         console.log(`${totalStaked} tokens currently staked in the pool.`)
 
         console.log(`\nShowing top 15 stakers:\n`)
@@ -143,5 +143,4 @@ export class StakingStuff {
     private async getUnclaimedRewards(user: string): Promise<number> {
         throw new Error('Method not yet implemented.')
     }
-
 }
