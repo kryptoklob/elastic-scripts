@@ -123,7 +123,7 @@ export class StakingStuff {
         let finalSortedMap = new Map([...eEURAmounts.entries()].sort((a, b) => b[1] - a[1] ));
         let finalSortedArray = Array.from(finalSortedMap)
 
-        console.log(`\nHighest Wallet Amounts:\n`)
+        console.log(`\nHighest Wallet Amounts Among Stakers:\n`)
 
         for (let x=0; x<15 && x<finalSortedArray.length-1; x++) {
             console.log(`Address: ${finalSortedArray[x][0]}, Amount: ${finalSortedArray[x][1]}`)
@@ -141,6 +141,7 @@ export class StakingStuff {
     }
 
     private async getUnclaimedRewards(user: string): Promise<number> {
-        throw new Error('Method not yet implemented.')
+        let unclaimedRewards = await this.stakingContract.earned(user)
+        return Number(Web3.utils.fromWei(unclaimedRewards.toString()))
     }
 }
