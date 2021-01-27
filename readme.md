@@ -4,7 +4,9 @@
 `npm install`
 
 ## Running
-`npm run run`
+First edit `src/config.ts` and add in your json-rpc provider (infura should work fine).
+
+Then run: `npm run run`
 
 ## About
 
